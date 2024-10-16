@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Upload and Convert Images to JPEG</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
+      rel="stylesheet"
+    />
+  </head>
+  <body
+    class="bg-gray-100 flex flex-col items-center justify-center min-h-screen"
+  >
+    <div class="bg-white shadow-md rounded-lg p-6 max-w-md w-full">
+      <h1 class="text-xl font-semibold mb-4">
+        Upload Images and Convert to JPEG
+      </h1>
+      <input
+        type="file"
+        id="fileInput"
+        multiple
+        accept="image/*"
+        class="border border-gray-300 p-2 mb-4 w-full rounded"
+      />
+      <button
+        id="convertBtn"
+        class="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600"
+      >
+        Convert to JPEG
+      </button>
+      <div id="result" class="mt-4"></div>
+    </div>
+
+    <script>
+      document
+        .getElementById("convertBtn")
+        .addEventListener("click", function () {
+          const fileInput = document.getElementById("fileInput");
+          const resultDiv = document.getElementById("result");
+          resultDiv.innerHTML = ""; // Clear previous results
+
+          if (fileInput.files.length === 0) {
+            alert("Please upload at least one image.");
+            return;
+          }
+
+          Array.from(fileInput.files).forEach((file) => {
+            const reader = new FileReader();
+
+            reader.onload = function (event) {
+              const img = new Image();
+              img.src = event.target.result;
+
+              img.onload = function () {
+                const canvas = document.createElement("canvas");
+                const ctx = canvas.getContext("2d");
+                canvas.width = img.width;
+                canvas.height = img.height;
+                ctx.drawImage(img, 0, 0);
+
+                // Convert canvas to JPEG and create a link to download
+                canvas.toBlob((blob) => {
+                  const jpegUrl = URL.createObjectURL(blob);
+                  const link = document.createElement("a");
+                  link.href = jpegUrl;
+                  link.download = file.name.replace(/\.[^/.]+$/, "") + ".jpeg"; // Rename to .jpeg
+                  link.textContent =
+                    "Download " + file.name.replace(/\.[^/.]+$/, "") + ".jpeg";
+                  link.className = "text-blue-500 underline mt-2 block";
+                  resultDiv.appendChild(link);
+                }, "image/jpeg");
+              };
+            };
+
+            reader.readAsDataURL(file);
+          });
+        });
+    </script>
+  </body>
+</html>
